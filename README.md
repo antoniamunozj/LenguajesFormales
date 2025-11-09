@@ -21,7 +21,7 @@ Este proyecto es una implementación en Python de un analizador sintáctico capa
 
 ## Requisitos
 
-- Python 3.x
+- Python 3.11
 
 ## Instalación
 
@@ -59,6 +59,14 @@ El archivo debe seguir una estructura estricta para ser leído correctamente:
 - **Importante:** Debe haber espacios alrededor de la flecha `->` y de la barra `|` que separa las alternativas.
 
 #### Ejemplos de `input.txt`:
+```
+5
+S -> T X
+X -> + T X | e
+T -> F Y
+Y -> * F Y | e
+F -> ( S ) | i
+```
 ```
 3
 S -> A B
