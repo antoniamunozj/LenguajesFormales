@@ -16,8 +16,10 @@ def es_gramatica_ll1(gramatica, conjuntos_first, conjuntos_follow):
     Retorna:
     - bool: True si la gramática es LL(1), False en caso contrario.
     """
+
     for no_terminal, producciones in gramatica.items():
-        # Comparamos cada par de producciones de un mismo no-terminal
+        # Condición 1: First(α) y First(β) deben ser disjuntos para A -> α | β 
+        # Comparamos cada par distinto de producciones de un mismo no-terminal
         for i in range(len(producciones)):
             for j in range(i + 1, len(producciones)):
                 p1 = producciones[i]
@@ -35,7 +37,6 @@ def es_gramatica_ll1(gramatica, conjuntos_first, conjuntos_follow):
                 # Condición 2: Si una producción deriva en 'e', su First no puede intersectar el Follow del no-terminal.
                 # (Esta condición se simplifica al verificar First(A) y Follow(A) al final)
     
-        # Condición 2 (versión simplificada y más robusta):
         # Si un no-terminal puede derivar en épsilon, su conjunto First y Follow no deben tener elementos en común.
         if 'e' in conjuntos_first[no_terminal]:
             if not conjuntos_first[no_terminal].isdisjoint(conjuntos_follow[no_terminal]):
@@ -54,6 +55,7 @@ def calcular_first_de_produccion(produccion, conjuntos_first):
     Retorna:
     - set: El conjunto First de la cadena de producción.
     """
+    # Caso base: Si la producción es directamente 'e', su First es {e}.
     if produccion == 'e':
         return {'e'}
     
@@ -66,7 +68,7 @@ def calcular_first_de_produccion(produccion, conjuntos_first):
         # Agrega todo el First del símbolo actual, excepto épsilon
         first_set.update(simbolo_first - {'e'})
         
-        # Si el símbolo actual no puede producir épsilon, detenemos el análisis de esta producción
+        # Si el símbolo actual no puede producir épsilon entonces la producción completa no puede derivar en épsilon y detenemos el análisis de esta producción
         if 'e' not in simbolo_first:
             todos_tienen_epsilon = False
             break

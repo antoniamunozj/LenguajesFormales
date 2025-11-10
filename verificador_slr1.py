@@ -20,12 +20,12 @@ def closure(items, gramatica):
         cambios = False
         # Se itera sobre una copia de la lista para poder modificar el conjunto 'cerrado' durante la iteración
         for (no_terminal, produccion, punto) in list(cerrado):
-            # Si el punto no está al final y le sigue un no-terminal...
+            # Si el punto no está al final y le sigue un no-terminal (ej: [A -> α.Bβ])
             if punto < len(produccion) and produccion[punto] in gramatica:
-                siguiente_no_terminal = produccion[punto]
+                siguiente_no_terminal = produccion[punto] # Obtiene el no-terminal que sigue al punto
                 # ...añadir todas las producciones de ese no-terminal al conjunto de ítems.
                 for prod_cuerpo in gramatica[siguiente_no_terminal]:
-                    item = (siguiente_no_terminal, prod_cuerpo, 0)
+                    item = (siguiente_no_terminal, prod_cuerpo, 0) # crea un nuevo ítem con el punto al inicio (ej: [B -> .γ])
                     if item not in cerrado:
                         cerrado.add(item)
                         cambios = True
@@ -41,6 +41,8 @@ def goto(items, simbolo, gramatica):
     el punto un lugar a la derecha, y luego se calcula la cerradura (closure)
     de este nuevo conjunto de ítems.
 
+    Representa el movimiento de un estado a otro al leer el símbolo 'X'.
+
     Parametros:
     - items (set): El conjunto de ítems LR(0) actual (un estado).
     - simbolo (str): El símbolo de transición (terminal o no-terminal).
@@ -49,11 +51,13 @@ def goto(items, simbolo, gramatica):
     Retorna:
     - set: El nuevo conjunto de ítems (el nuevo estado) tras la transición.
     """
+    # Inicializa un conjunto para almacenar los ítems que resultan de mover el punto.
     nuevos_items = set()
     for (no_terminal, produccion, punto) in items:
-        # Si el punto no está al final y el símbolo después del punto es el que buscamos...
+        # Si el punto no está al final y si el símbolo después del punto coincide con el 'simbolo' de transición que estamos buscando
+        # Ejemplo: Si tenemos [A -> α.Xβ] y 'simbolo' es 'X'.
         if punto < len(produccion) and produccion[punto] == simbolo:
-            # ...movemos el punto una posición a la derecha y añadimos el nuevo ítem.
+            # Si coincide, crea un nuevo ítem moviendo el punto una posición a la derecha
             nuevos_items.add((no_terminal, produccion, punto + 1))
     
     # Devolvemos la cerradura del nuevo conjunto de ítems.
@@ -92,40 +96,49 @@ def es_gramatica_slr1(gramatica, conjuntos_follow):
         estado_actual = pendientes.pop(0)
         simbolos = list(gramatica.keys()) + list(set(c for prod_list in gramatica.values() for p in prod_list for c in p if c not in gramatica and c != 'e'))
 
+         # Para cada posible símbolo de transición
         for simbolo in simbolos:
+            # Calcula el siguiente estado al que se transiciona con este símbolo
             nuevo_estado = goto(estado_actual, simbolo, gramatica_aumentada)
             if nuevo_estado and nuevo_estado not in estados:
-                estados.append(nuevo_estado)
-                pendientes.append(nuevo_estado)
+                estados.append(nuevo_estado) # lo añade a la lista de estados generados
+                pendientes.append(nuevo_estado) # y lo añade a la cola para procesar sus transiciones.
 
-    # Verificar cada estado en busca de conflictos
+    # --- Verificar cada estado en busca de conflictos
     for estado in estados:
-        items_reduce = []
-        simbolos_shift = set()
+        items_reduce = [] # Lista para almacenar los no-terminales que pueden reducirse en este estado
+        simbolos_shift = set()  # Conjunto de símbolos por los que se puede hacer 'shift' en este estado
 
         # Separar los ítems del estado en acciones de shift y de reduce
         for (no_terminal, produccion, punto) in estado:
+             # Caso especial: Si la producción es 'e', siempre es un ítem de reducción
             if produccion == 'e':
+                 # Solo se añade si no es el símbolo inicial aumentado (S' -> S)
                 if no_terminal != simbolo_inicial_aumentado:
                     items_reduce.append(no_terminal)
                 continue
 
+            # Si el punto no está al final de la producción es un ítem de Shift
             if punto < len(produccion):
-                simbolo_siguiente = produccion[punto]
+                simbolo_siguiente = produccion[punto]  # Obtiene el símbolo que sigue al punto
                 if simbolo_siguiente not in gramatica:
-                    simbolos_shift.add(simbolo_siguiente)
+                    simbolos_shift.add(simbolo_siguiente)  # lo añade al conjunto de símbolos de shift.
             else: # El punto está al final, es un ítem de reducción
                 if no_terminal != simbolo_inicial_aumentado:
                     items_reduce.append(no_terminal)
 
-        # Conflicto Shift/Reduce: si un símbolo de shift está en el Follow de un ítem de reducción.
+        # Detección de conflictos
+        # Conflicto Shift/Reduce: si un símbolo de shift está en el Follow de un no-terminal que puede reducirse.
         for nt_reduce in items_reduce:
+            # Comprueba si la intersección entre los símbolos de shift y el Follow del no-terminal que reduce no es vacía
             if not simbolos_shift.isdisjoint(conjuntos_follow[nt_reduce]):
                 return False # Conflicto S/R encontrado
 
-        # Conflicto Reduce/Reduce: si hay múltiples ítems de reducción y sus Follow sets se solapan.
+        # Conflicto Reduce/Reduce: si hay múltiples no-terminales que pueden reducirse en ese estado y sus Follow sets se solapan
         if len(items_reduce) > 1:
+             # Se obtienen los conjuntos Follow de todos los no-terminales que pueden reducirse
             conjuntos_follow_reduce = [conjuntos_follow[nt] for nt in items_reduce]
+             # Compara cada par de conjuntos Follow
             for r_i in range(len(conjuntos_follow_reduce)):
                 for r_j in range(r_i + 1, len(conjuntos_follow_reduce)):
                     if not conjuntos_follow_reduce[r_i].isdisjoint(conjuntos_follow_reduce[r_j]):

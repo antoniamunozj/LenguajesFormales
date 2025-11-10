@@ -36,13 +36,16 @@ def calcular_first(simbolo, gramatica, first, visitados):
     if simbolo in visitados:
         return first[simbolo]
     
+    # --- Caso base: el simbolo no es una clave en el diccionario gramatica
     # Si el simbolo es terminal, su conjunto First es el mismo
     if simbolo not in gramatica:  
         return {simbolo}
     
+    # --- Marcado de visita
     # Marcamos el simbolo actual como visitado para evitar bucles
     visitados.add(simbolo)
 
+    #--- Recorrido de producciones
     # Recorremos cada producción del no terminal actual
     for produccion in gramatica[simbolo]:
         # Recorremos los símbolos de la producción, de izquierda a derecha

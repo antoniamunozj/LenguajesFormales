@@ -26,18 +26,21 @@ def calcular_conjuntos_follow(gramatica, conjuntos_first):
             for produccion in gramatica[no_terminal]:
 
                 # Inicializamos la cola con el Follow del no_terminal actual
-                # Esta cola se usa para propagar símbolos hacia la izquierda.
+                # Esta cola se usa para propagar símbolos hacia la izquierda, se va llenando con los First y Follow correspondientes
+                # Esta 'cola' se usará para arrastrar" los símbolos Follow a través de la producción en reversa.
                 cola = follow[no_terminal].copy()
 
                 # Recorremos la producción al revés (de derecha a izquierda)
                 for simbolo in reversed(produccion):
                     if simbolo in gramatica:  # Es un no terminal
 
-                        # Actualizamos el conjunto Follow del simbolo actual si hay elementos nuevos para agregar
+                        # Regla 3:  A -> αB
+                        # Actualizamos el conjunto Follow del simbolo actual si hay elementos nuevos en la cola para agregar
                         if cola - follow[simbolo]:
                             follow[simbolo].update(cola)
                             cambio = True # Indicamos que hubo un cambio y debemos seguir iterando
 
+                        # Regla 2: A -> αBβ
                         # Si 'ε' esta en First, agregamos tambien los terminales de First menos 'ε' a la cola
                         if 'e' in conjuntos_first[simbolo]:
                             cola.update(conjuntos_first[simbolo] - {'e'})
@@ -45,6 +48,7 @@ def calcular_conjuntos_follow(gramatica, conjuntos_first):
                             # Si 'ε' no esta en First, la cola se convierte en First del simbolo
                             cola = conjuntos_first[simbolo].copy()
                     else:
+                        # Caso Base: el simbolo es un terminal
                         # Si es un terminal, la cola pasa a ser solo ese terminal (se convierte en {simbolo})
                         cola = {simbolo}
     

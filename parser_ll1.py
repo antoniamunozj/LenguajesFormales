@@ -1,6 +1,7 @@
 def parse_ll1(cadena, tabla_ll1, simbolo_inicial, verbose=False):
     """
     Analiza la cadena de entrada usando el parser LL(1) y la tabla de analisis predictivo.
+    Determina qué producción aplicar en cada paso, intentando derivar la cadena de entrada desde el simbolo_inicial de la gramática
 
     Parametros:
     - cadena (str): La cadena de entrada a analizar.
@@ -11,7 +12,7 @@ def parse_ll1(cadena, tabla_ll1, simbolo_inicial, verbose=False):
     Retorna:
     - bool: True si la cadena es aceptada, False si no lo es.
     """
-    
+    # La pila representa las "expectativas" del parser: lo que espera encontrar o expandir
     pila = ['$', simbolo_inicial] # Inicializamos la pila con el símbolo inicial y el marcador de fin de cadena '$'
     cadena += '$' # Tambien se añade el marcador de fin de cadena '$' al final de la entrada
     posicion = 0 # índice del símbolo actual que estamos leyendo de la cadena
@@ -33,6 +34,7 @@ def parse_ll1(cadena, tabla_ll1, simbolo_inicial, verbose=False):
             input_str = cadena[posicion:] # Mostramos la parte de la cadena que falta por leer
             print(f"{pila_str:<30} {input_str:<20}", end="")
 
+        # --- Logica de analisis
         # Caso 1: el tope de la pila coincide con el símbolo actual de entrada
         if tope == simbolo_actual:
              # Si ambos son '$', significa que llegamos al final de la pila y la entrada → Aceptado
@@ -45,7 +47,7 @@ def parse_ll1(cadena, tabla_ll1, simbolo_inicial, verbose=False):
             pila.pop()
             posicion += 1
             if verbose:
-                print(f"Match '{simbolo_actual}'")
+                print(f"Match '{simbolo_actual}'") # Imprime la acción de coincidencia
 
         # Caso 2: el tope de la pila es un no terminal y hay una producción en la tabla LL(1)
         elif tope in tabla_ll1 and simbolo_actual in tabla_ll1[tope]:
@@ -54,10 +56,10 @@ def parse_ll1(cadena, tabla_ll1, simbolo_inicial, verbose=False):
             # Obtenemos la producción correspondiente de la tabla LL(1)
             produccion = tabla_ll1[tope][simbolo_actual]
 
-            # Si la producción no es 'ε', añadimos sus símbolos a la pila en orden inverso
+            # Si la producción no es 'e', añadimos sus símbolos a la pila en orden inverso
             # (porque el análisis LL(1) expande el no terminal reemplazándolo por su producción)
             if produccion != 'e':
-                pila.extend(reversed(list(produccion)))
+                pila.extend(reversed(list(produccion))) # para que el primer símbolo de la producción quede en el tope de la pila
             if verbose:
                 print(f"Produce with {tope} -> {produccion}")
         
