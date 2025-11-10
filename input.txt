@@ -1,6 +1,4 @@
-5
-S -> T X
-X -> + T X | e
-T -> F Y
-Y -> * F Y | e
-F -> ( S ) | i
+3
+S -> A B
+A -> a A | e
+B -> b
