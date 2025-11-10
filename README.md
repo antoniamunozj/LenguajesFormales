@@ -21,7 +21,7 @@ Este proyecto es una implementación en Python de un analizador sintáctico capa
 
 ## Requisitos
 
-- Python 3.x
+- Python 3.11
 
 ## Instalación
 
@@ -60,8 +60,33 @@ El archivo debe seguir una estructura estricta para ser leído correctamente:
 
 #### Ejemplos de `input.txt`:
 ```
+5
+S -> T X
+X -> + T X | e
+T -> F Y
+Y -> * F Y | e
+F -> ( S ) | i
+```
+- **Analisis esperado:** Grammar is both LL(1) and SLR(1)
+- **Cadenas de prueba:** i, i+i, (i* i), i+i*i
+```
 3
 S -> A B
 A -> a A | e
 B -> b
 ```
+- **Analisis esperado:** Grammar is both LL(1) and SLR(1)
+- **Cadenas de prueba:** b, ab, aaaaab
+```
+3
+S -> S + T | T
+T -> T * F | F
+F -> ( S ) | i
+```
+- **Analisis esperado:** Grammar is SLR(1)
+- **Cadenas de prueba:** i, i+i, i*i+i
+```
+1
+S -> i S e S | i S | a
+```
+- **Analisis esperado:** Grammar is neither LL(1) nor SLR(1)
