@@ -5,6 +5,7 @@ from verificador_slr1 import es_gramatica_slr1
 from tabla_ll1 import construir_tabla_ll1
 from parser_ll1 import parse_ll1
 from parser_slr1 import construir_tabla_slr1, parse_slr1
+import copy
 
 def analizar_gramatica_input(texto_entrada):
     """

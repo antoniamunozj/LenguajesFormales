@@ -43,7 +43,7 @@ def calcular_conjuntos_follow(gramatica, conjuntos_first):
                             cola.update(conjuntos_first[simbolo] - {'e'})
                         else:
                             # Si 'ε' no esta en First, la cola se convierte en First del simbolo
-                            cola = conjuntos_first[simbolo]
+                            cola = conjuntos_first[simbolo].copy()
                     else:
                         # Si es un terminal, la cola pasa a ser solo ese terminal (se convierte en {simbolo})
                         cola = {simbolo}

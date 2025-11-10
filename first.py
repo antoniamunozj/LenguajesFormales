@@ -17,7 +17,6 @@ def calcular_conjuntos_first(gramatica):
     # Recorremos cada no terminal y calculamos su conjunto FIRST usando recursión.
     for no_terminal in gramatica:
         calcular_first(no_terminal, gramatica, first, set())
-    
     return first
 
 def calcular_first(simbolo, gramatica, first, visitados):
